@@ -1,5 +1,6 @@
 "use client"
 import * as z from "zod";
+import axios from "axios"
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
@@ -8,6 +9,9 @@ import { Input } from "@/components/ui/input";
 
 import Header from "@/components/Header";
 import { MessageSquare } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { ChatCompletionUserMessageParam } from "openai/resources/index.mjs";
 
 const formSchema = z.object({
     start_conversation: z.string().min(1, {
@@ -17,7 +21,8 @@ const formSchema = z.object({
 
 
 const ConversationPage = () => {
-
+    const router = useRouter()
+    const [messages, setMessages] = useState("")
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -29,7 +34,24 @@ const ConversationPage = () => {
 
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
-        console.log(values)
+        try {
+            const userMessage: ChatCompletionUserMessageParam = {
+                role: "user",
+                content: values.start_conversation,
+            }
+
+            const response = await axios.post("/api/conversation", {
+                messages: userMessage
+            })
+
+            setMessages(response.data.content)
+            form.reset()
+
+        } catch (error) {
+            console.log(error)
+        } finally {
+            router.refresh()
+        }
     }
 
     return (
@@ -78,6 +100,9 @@ const ConversationPage = () => {
                     </Button>
                 </form>
             </Form>
+
+            <div>{messages}</div>
+
 
         </div>
     );
