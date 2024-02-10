@@ -75,9 +75,9 @@ const ConversationPage = () => {
             )}
 
             {/* <div>{messages}</div> */}
-            {messages.map((conversation) => (
+            {messages.map((conversation, conversationIndex) => (
                 <div
-                    key={conversation.content}
+                    key={conversationIndex}
                     className={cn(
                         "p-8 w-full flex items-start gap-x-8 rounded-lg",
                         conversation.role === "user" ? "bg-white border border-black/10" : "bg-muted",
@@ -85,7 +85,13 @@ const ConversationPage = () => {
                 >
                     {conversation.role === "user" ? <UserAvatar /> : <BotAvatar />}
                     <p className="text-sm">
-                        <span>{conversation.content}</span>
+                        {Array.isArray(conversation.content) ? (
+                            conversation.content.map((part: any, partIndex) => (
+                                <span key={partIndex}>{part.text ? part.text : ""}</span>
+                            ))
+                        ) : (
+                            <span>{conversation.content}</span>
+                        )}
                     </p>
                 </div>))
             }
