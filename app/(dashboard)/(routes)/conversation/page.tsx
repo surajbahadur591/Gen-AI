@@ -74,7 +74,6 @@ const ConversationPage = () => {
                 <Empty label="No conversation started." />
             )}
 
-            {/* <div>{messages}</div> */}
             {messages.map((conversation, conversationIndex) => (
                 <div
                     key={conversationIndex}
@@ -86,8 +85,8 @@ const ConversationPage = () => {
                     {conversation.role === "user" ? <UserAvatar /> : <BotAvatar />}
                     <p className="text-sm">
                         {Array.isArray(conversation.content) ? (
-                            conversation.content.map((part: any, partIndex) => (
-                                <span key={partIndex}>{part.text ? part.text : ""}</span>
+                            conversation.content.map((content: any, contentIndex) => (
+                                <span key={contentIndex}>{content.text ? content.text : ""}</span>
                             ))
                         ) : (
                             <span>{conversation.content}</span>
