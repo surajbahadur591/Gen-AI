@@ -6,12 +6,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 import Header from "@/components/Header";
 import { MessageSquare } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ChatCompletionUserMessageParam } from "openai/resources/index.mjs";
+import { BotAvatar } from "@/components/BotAvatar";
+import { UserAvatar } from "@/components/UserAvatar";
+import { Loader } from "@/components/Loader";
+import { Empty } from "@/components/Empty";
 
 const formSchema = z.object({
     start_conversation: z.string().min(1, {
@@ -22,7 +27,7 @@ const formSchema = z.object({
 
 const ConversationPage = () => {
     const router = useRouter()
-    const [messages, setMessages] = useState("")
+    const [messages, setMessages] = useState<ChatCompletionUserMessageParam[]>([])
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -39,12 +44,13 @@ const ConversationPage = () => {
                 role: "user",
                 content: values.start_conversation,
             }
+            const updatedMessages = [...messages, userMessage]
 
             const response = await axios.post("/api/conversation", {
-                messages: userMessage
+                messages: updatedMessages
             })
 
-            setMessages(response.data.content)
+            setMessages((prevMessages) => [...prevMessages, userMessage, response.data])
             form.reset()
 
         } catch (error) {
@@ -63,6 +69,34 @@ const ConversationPage = () => {
                 iconColor="text-violet-500"
                 bgColor="bg-violet-500/10"
             />
+
+            {messages.length === 0 && !isLoading && (
+                <Empty label="No conversation started." />
+            )}
+
+            {/* <div>{messages}</div> */}
+            {messages.map((conversation) => (
+                <div
+                    key={conversation.content}
+                    className={cn(
+                        "p-8 w-full flex items-start gap-x-8 rounded-lg",
+                        conversation.role === "user" ? "bg-white border border-black/10" : "bg-muted",
+                    )}
+                >
+                    {conversation.role === "user" ? <UserAvatar /> : <BotAvatar />}
+                    <p className="text-sm">
+                        <span>{conversation.content}</span>
+                    </p>
+                </div>))
+            }
+
+            {
+                isLoading && (
+                    <div className="p-8 rounded-lg w-full flex items-center justify-center bg-muted">
+                        <Loader />
+                    </div>
+                )
+            }
 
             <Form {...form}>
                 <form
@@ -100,11 +134,7 @@ const ConversationPage = () => {
                     </Button>
                 </form>
             </Form>
-
-            <div>{messages}</div>
-
-
-        </div>
+        </div >
     );
 }
 
