@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 import Header from "@/components/Header";
-import { MessageSquare } from "lucide-react";
+import { Code } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ChatCompletionUserMessageParam } from "openai/resources/index.mjs";
@@ -18,6 +18,7 @@ import { UserAvatar } from "@/components/UserAvatar";
 import { Loader } from "@/components/Loader";
 import { Empty } from "@/components/Empty";
 
+import ReactMarkdown from 'react-markdown'
 const formSchema = z.object({
     start_conversation: z.string().min(1, {
         message: "Prompt is required."
@@ -25,7 +26,7 @@ const formSchema = z.object({
 });
 
 
-const ConversationPage = () => {
+const CodePage = () => {
     const router = useRouter()
     const [messages, setMessages] = useState<ChatCompletionUserMessageParam[]>([])
     const form = useForm<z.infer<typeof formSchema>>({
@@ -46,7 +47,7 @@ const ConversationPage = () => {
             }
             const updatedMessages = [...messages, userMessage]
 
-            const response = await axios.post("/api/conversation", {
+            const response = await axios.post("/api/code", {
                 messages: updatedMessages
             })
 
@@ -63,10 +64,10 @@ const ConversationPage = () => {
     return (
         <div>
             <Header
-                title="Conversation"
-                description="Our most advanced conversation model."
-                icon={MessageSquare}
-                iconColor="text-violet-500"
+                title="Code generation"
+                description="Generate code for all languages"
+                icon={Code}
+                iconColor="text-green-700"
                 bgColor="bg-violet-500/10"
             />
 
@@ -86,10 +87,22 @@ const ConversationPage = () => {
                     <p className="text-sm">
                         {Array.isArray(conversation.content) ? (
                             conversation.content.map((content: any, contentIndex) => (
-                                <span key={contentIndex}>{content.text ? content.text : ""}</span>
+                                <ReactMarkdown key={contentIndex}>{content.text ? content.text : ""}</ReactMarkdown>
                             ))
                         ) : (
-                            <span>{conversation.content}</span>
+                            <ReactMarkdown
+                                components={{
+                                    pre: ({ node, ...props }) => (
+                                        <div className="overflow-auto w-full my-2 bg-black/10 p-2 rounded-lg">
+                                            <pre {...props} />
+                                        </div>
+                                    ),
+                                    code: ({ node, ...props }) => (
+                                        <code className="bg-black/10 rounded-lg p-1" {...props} />
+                                    )
+                                }}
+                                className="text-sm overflow-hidden leading-7"
+                            >{conversation.content || ""}</ReactMarkdown>
                         )}
                     </p>
                 </div>))
@@ -127,7 +140,7 @@ const ConversationPage = () => {
                                     <Input
                                         className="border-0 outline-none focus-visible:ring-0 focus-visible:ring-transparent"
                                         disabled={isLoading}
-                                        placeholder="Tell me what is 2+2?"
+                                        placeholder="How to create landing page using React and material UI?"
                                         {...field}
                                     />
                                 </FormControl>
@@ -135,7 +148,7 @@ const ConversationPage = () => {
                         )}
                     />
                     <Button className="col-span-12 lg:col-span-2 w-full" type="submit" disabled={isLoading} size="icon">
-                        Submit
+                        Generate Code
                     </Button>
                 </form>
             </Form>
@@ -143,4 +156,4 @@ const ConversationPage = () => {
     );
 }
 
-export default ConversationPage;
+export default CodePage;
