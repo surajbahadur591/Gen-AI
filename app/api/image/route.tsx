@@ -38,7 +38,7 @@ export async function POST(req: Request) {
         // });
 
         const imageResponse = await openai.images.generate({
-            prompt: start_conversation,
+            prompt: start_conversation + 'image should be clear. generate image with as much as details possible. show full image. full head if head is present',
             size: resolution,
             quality: "standard",
             n: parseInt(amount, 10),

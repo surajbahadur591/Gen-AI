@@ -127,7 +127,7 @@ const ConversationPage = () => {
                                     <Input
                                         className="border-0 outline-none focus-visible:ring-0 focus-visible:ring-transparent"
                                         disabled={isLoading}
-                                        placeholder="Tell me what is 2+2?"
+                                        placeholder="How to lose weight in 1 month?"
                                         {...field}
                                     />
                                 </FormControl>

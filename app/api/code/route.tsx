@@ -7,7 +7,7 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const instructionMessage: ChatCompletionSystemMessageParam = {
     role: "system",
-    content: "you are a code generator. you will answer only in markdown code snippet. you need to use with latest trends and best practices. You have to provide optimization approch for each question asked"
+    content: "you are a code generator. you will answer only in markdown code snippet. you need to use with latest trends and best practices. You have to provide optimization approch for each question asked. generate result in 5 seconds"
 
 
 }
