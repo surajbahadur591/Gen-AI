@@ -6,15 +6,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
 
 import Header from "@/components/Header";
-import { MessageSquare } from "lucide-react";
+import { VideoIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ChatCompletionUserMessageParam } from "openai/resources/index.mjs";
-import { BotAvatar } from "@/components/BotAvatar";
-import { UserAvatar } from "@/components/UserAvatar";
 import { Loader } from "@/components/Loader";
 import { Empty } from "@/components/Empty";
 
@@ -25,9 +21,10 @@ const formSchema = z.object({
 });
 
 
-const ConversationPage = () => {
+const VideoPage = () => {
     const router = useRouter()
-    const [messages, setMessages] = useState<ChatCompletionUserMessageParam[]>([])
+    const [video, setVideo] = useState<string>();
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -40,17 +37,12 @@ const ConversationPage = () => {
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         try {
-            const userMessage: ChatCompletionUserMessageParam = {
-                role: "user",
-                content: values.start_conversation,
-            }
-            const updatedMessages = [...messages, userMessage]
+            setVideo(undefined);
 
-            const response = await axios.post("/api/conversation", {
-                messages: updatedMessages
-            })
+            const response = await axios.post('/api/video', values);
 
-            setMessages((prevMessages) => [...prevMessages, userMessage, response.data])
+
+            setVideo(response.data[0]);
             form.reset()
 
         } catch (error) {
@@ -63,37 +55,23 @@ const ConversationPage = () => {
     return (
         <div>
             <Header
-                title="Conversation"
-                description="Our most advanced conversation model."
-                icon={MessageSquare}
+                title="Shorts Generator"
+                description="Create reels or shorts for social media."
+                icon={VideoIcon}
                 iconColor="text-violet-500"
                 bgColor="bg-violet-500/10"
             />
 
-            {messages.length === 0 && !isLoading && (
-                <Empty label="No conversation started." />
+            {!video && !isLoading && (
+                <Empty label="No video files generated." />
             )}
 
-            {messages.map((conversation, conversationIndex) => (
-                <div
-                    key={conversationIndex}
-                    className={cn(
-                        "p-8 w-full flex items-start gap-x-8 rounded-lg",
-                        conversation.role === "user" ? "bg-white border border-black/10" : "bg-muted",
-                    )}
-                >
-                    {conversation.role === "user" ? <UserAvatar /> : <BotAvatar />}
-                    <p className="text-sm">
-                        {Array.isArray(conversation.content) ? (
-                            conversation.content.map((content: any, contentIndex) => (
-                                <span key={contentIndex}>{content.text ? content.text : ""}</span>
-                            ))
-                        ) : (
-                            <span>{conversation.content}</span>
-                        )}
-                    </p>
-                </div>))
-            }
+
+            {video && (
+                <video controls className="w-full aspect-video mt-8 rounded-lg border bg-black">
+                    <source src={video} />
+                </video>
+            )}
 
             {
                 isLoading && (
@@ -127,7 +105,7 @@ const ConversationPage = () => {
                                     <Input
                                         className="border-0 outline-none focus-visible:ring-0 focus-visible:ring-transparent"
                                         disabled={isLoading}
-                                        placeholder="How to lose weight in 1 month?"
+                                        placeholder="Clown fish swimming in a coral ree"
                                         {...field}
                                     />
                                 </FormControl>
@@ -143,4 +121,4 @@ const ConversationPage = () => {
     );
 }
 
-export default ConversationPage;
+export default VideoPage;

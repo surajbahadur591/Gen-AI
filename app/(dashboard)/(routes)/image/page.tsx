@@ -161,7 +161,7 @@ const ImagePage = () => {
                                     <Input
                                         className="border-0 outline-none focus-visible:ring-0 focus-visible:ring-transparent"
                                         disabled={isLoading}
-                                        placeholder="Generate a logo for brandname 'care for health'"
+                                        placeholder="Generate a logo for electic company"
                                         {...field}
                                     />
                                 </FormControl>
