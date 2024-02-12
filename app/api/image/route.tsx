@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
+import { increaseAPILimit, checkAPILimit } from "@/lib/api-limit";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -37,12 +38,20 @@ export async function POST(req: Request) {
         //     n: parseInt(amount, 10),
         // });
 
+        const free_trail = await checkAPILimit();
+        if (!free_trail) {
+            return new NextResponse("Free trail Expired", { status: 403 })
+        }
+
         const imageResponse = await openai.images.generate({
             prompt: start_conversation + 'image should be clear. generate image with as much as details possible. show full image. full head if head is present',
             size: resolution,
             quality: "standard",
             n: parseInt(amount, 10),
         });
+
+        await increaseAPILimit()
+
         return NextResponse.json(imageResponse.data);
 
     } catch (error) {
